@@ -12,6 +12,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <filesystem>
 
 
 using namespace std;
@@ -119,49 +120,67 @@ int main(int argc, const char** argv)
 	//    return -1;
 	//};
 
-
-	Mat img = imread(objs_picture_path, IMREAD_COLOR);
-	if (img.empty())
-	{
-		std::cout << "Could not read the image: " << objs_cascade_name << std::endl;
-		return 1;
-	}
 	if (!objs_cascade.load(objs_cascade_name))
 	{
 		cout << "--(!)Error loading objs cascade\n";
 		return -1;
 	};
 
-	TiXmlDocument doc("data/objs_cascade.xml");
+
+	//Mat img = imread(objs_picture_path, IMREAD_COLOR);
+	//if (img.empty())
+	//{
+	//	std::cout << "Could not read the image: " << objs_cascade_name << std::endl;
+	//	return 1;
+	//}
+
+	vector<string> vec_tags;
+	vector<string> vec_objs;
+
+
+	TiXmlDocument cascade_objs_doc("data/objs_cascade.xml");
 	//doc.LoadFile("data/objs_cascade.xml");
-	if (!doc.LoadFile())
+	if (!cascade_objs_doc.LoadFile())
 	{
-		printf("%s", doc.ErrorDesc());
+		printf("%s", cascade_objs_doc.ErrorDesc());
 		return -1;
 	}
 	else {
 
-		TiXmlNode* opencv_storage = doc.FirstChildElement();
+		TiXmlNode* opencv_storage = cascade_objs_doc.FirstChildElement();
 		//Tìm phần tử con đầu tiên của node roor
 		TiXmlNode* cascade = opencv_storage->FirstChildElement();
 		//cout <<"cascade: "<< cascade->ToElement()/*Chuyển phần tử thành element */->Attribute("type_id")/*Lấy ra type_id của casecade*/ << endl;
 	}
-	string line;
-	ifstream infile("data/classify_objs.txt");
-	vector<string> vec_objs;
-	while (getline(infile, line))
+
+	TiXmlDocument classify_objs_doc("data/classify_objs.xml");
+	//doc.LoadFile("data/objs_cascade.xml");
+	if (!classify_objs_doc.LoadFile())
 	{
-		std::istringstream iss(line);
-		//cout << line << "\n";
-		vec_objs.push_back(line);
-		cout << "vector: " << line << "\n";
-	}
-	if (vec_objs.size() == 0) {
-		cout << "No line in file or file not exist! \n";
+		printf("%s", classify_objs_doc.ErrorDesc());
+		return -1;
 	}
 	else {
-		cout<<"There are " << vec_objs.size()<<" objects to identify! \n";
+
+		TiXmlNode* objects_info = classify_objs_doc.FirstChildElement();
+		TiXmlNode* tag_list = objects_info->FirstChildElement();
+
+		for (TiXmlNode* tags = tag_list->FirstChildElement(); tags != NULL; tags = tags->NextSibling()) {
+
+			cout <<"Tag: " << tags->Value()<<"\n";
+			vec_tags.push_back(tags->Value());
+			for (TiXmlNode* objs = tags->FirstChildElement(); objs != NULL; objs = objs->NextSibling()) {
+				cout << objs->ToElement()->GetText() << "\n";
+				vec_objs.push_back(objs->ToElement()->GetText());
+
+			}
+
+		}
 	}
+
+
+
+
 
 #pragma endregion
 
@@ -192,9 +211,8 @@ int main(int argc, const char** argv)
 	//    }
 	//}
 
-
-
 	//detectObjectAndDisplay(img, objs_cascade_name);
+
 
 	getchar();
 

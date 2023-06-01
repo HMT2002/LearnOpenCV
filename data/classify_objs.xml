@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<objects_info>
+<tag>
+<social>
+<objs>plant</objs>
+<objs>person</objs>
+</social>
+<technique>
+<objs>phone</objs>
+<objs>car</objs>
+</technique>
+<cuisine>
+<objs>food</objs>
+</cuisine>
+<art>
+<objs>brush</objs>
+<objs>paint</objs>
+</art>
+<others>
+<objs>water</objs>
+</others>
+</tag>
+
+<object_data></object_data>
+</objects_info>
