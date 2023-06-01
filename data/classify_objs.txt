@@ -1,0 +1,6 @@
+person
+phone
+car
+plant
+food
+others
