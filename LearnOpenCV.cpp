@@ -61,7 +61,7 @@ void detectAndDisplay(Mat frame)
 	imshow("Capture - Face detection", frame);
 }
 
-void detectObjectAndDisplay(Mat frame, CascadeClassifier obj_cascade)
+void detectObjectAndDisplayInEllipse(Mat frame, CascadeClassifier obj_cascade)
 {
 	Mat frame_gray;
 	cvtColor(frame, frame_gray, COLOR_BGR2GRAY);
@@ -72,7 +72,33 @@ void detectObjectAndDisplay(Mat frame, CascadeClassifier obj_cascade)
 	for (size_t i = 0; i < objs.size(); i++)
 	{
 		Point center(objs[i].x + objs[i].width / 2, objs[i].y + objs[i].height / 2);
+		cout << "X: " << center.x << "; Y: " << center.y << "\n";
 		ellipse(frame, center, Size(objs[i].width / 2, objs[i].height / 2), 0, 0, 360, Scalar(255, 0, 255), 4);
+
+
+	}
+
+	//-- Show what you got
+	imshow("Capture - Face detection", frame);
+	cv::waitKey(0);
+}
+
+void detectObjectAndDisplayInRectangle(Mat frame, CascadeClassifier obj_cascade)
+{
+	Mat frame_gray;
+	cvtColor(frame, frame_gray, COLOR_BGR2GRAY);
+	equalizeHist(frame_gray, frame_gray);
+	//-- Detect faces
+	std::vector<Rect> objs;
+	obj_cascade.detectMultiScale(frame_gray, objs);
+	for (size_t i = 0; i < objs.size(); i++)
+	{
+		cout << "X: " << objs[i].x << "; Y: " << objs[i].y << "\n";
+		Rect r = Rect(objs[i].x, objs[i].y, objs[i].width, objs[i].height);
+
+		cv::rectangle(frame, r, Scalar(255, 0, 255), 2, 8, 0);
+		putText(frame, "Text in Images", Point(objs[i].x+10, objs[i].y+10), FONT_HERSHEY_COMPLEX, 0.5, Scalar(255, 0, 255),2);//Putting the text in the matrix//
+		//draw the rect defined by r with line thickness 1 and Blue color
 	}
 
 	//-- Show what you got
@@ -104,6 +130,8 @@ int main(int argc, const char** argv)
 	String eyes_cascade_name = samples::findFile(parser.get<String>("eyes_cascade"));
 	String objs_cascade_name = samples::findFile(parser.get<String>("objs_cascade"));
 	String objs_picture_path = samples::findFile("data/image.jpg");
+	String objs_picture_lena_path = samples::findFile("data/lena.png");
+
 	cout << objs_picture_path + "\n";
 	cout << objs_cascade_name + "\n";
 
@@ -127,17 +155,13 @@ int main(int argc, const char** argv)
 	};
 
 
-	//Mat img = imread(objs_picture_path, IMREAD_COLOR);
-	//if (img.empty())
-	//{
-	//	std::cout << "Could not read the image: " << objs_cascade_name << std::endl;
-	//	return 1;
-	//}
-
-	vector<string> vec_tags;
-	vector<string> vec_objs;
 
 
+	// Dùng TinyXml
+	//1. Load các dữ liệu cần thiết để quét vật thể: vector các tags(.xml), vector các vật thể(.xml), cascade của dữ liệu đánh  giá(.xml), ảnh test lena(.png)
+
+
+	// Đọc cascade
 	TiXmlDocument cascade_objs_doc("data/objs_cascade.xml");
 	//doc.LoadFile("data/objs_cascade.xml");
 	if (!cascade_objs_doc.LoadFile())
@@ -153,6 +177,10 @@ int main(int argc, const char** argv)
 		//cout <<"cascade: "<< cascade->ToElement()/*Chuyển phần tử thành element */->Attribute("type_id")/*Lấy ra type_id của casecade*/ << endl;
 	}
 
+
+	//Đọc vector tags, vector vật thể
+	vector<string> vec_tags;
+	vector<string> vec_objs;
 	TiXmlDocument classify_objs_doc("data/classify_objs.xml");
 	//doc.LoadFile("data/objs_cascade.xml");
 	if (!classify_objs_doc.LoadFile())
@@ -166,7 +194,6 @@ int main(int argc, const char** argv)
 		TiXmlNode* tag_list = objects_info->FirstChildElement();
 
 		for (TiXmlNode* tags = tag_list->FirstChildElement(); tags != NULL; tags = tags->NextSibling()) {
-
 			cout <<"Tag: " << tags->Value()<<"\n";
 			vec_tags.push_back(tags->Value());
 			for (TiXmlNode* objs = tags->FirstChildElement(); objs != NULL; objs = objs->NextSibling()) {
@@ -179,10 +206,23 @@ int main(int argc, const char** argv)
 	}
 
 
+	//Load ảnh test lena
+	Mat img_lena = imread(objs_picture_lena_path, IMREAD_COLOR);
+	if (img_lena.empty())
+	{
+		std::cout << "Could not read the image: " << objs_picture_lena_path << std::endl;
+		return 1;
+	}
 
-
-
+	Mat img = imread(objs_picture_path, IMREAD_COLOR);
+	if (img.empty())
+	{
+		std::cout << "Could not read the image: " << objs_picture_path << std::endl;
+		return 1;
+	}
 #pragma endregion
+
+
 
 	//int camera_device = parser.get<int>("camera");
 	//VideoCapture capture;
@@ -211,8 +251,9 @@ int main(int argc, const char** argv)
 	//    }
 	//}
 
-	//detectObjectAndDisplay(img, objs_cascade_name);
-
+	//detectObjectAndDisplayInEllipse(img, face_cascade_name);
+	//detectObjectAndDisplayInRectangle(img_lena, face_cascade_name);
+	detectObjectAndDisplayInRectangle(img, face_cascade_name);
 
 	getchar();
 
