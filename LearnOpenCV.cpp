@@ -13,11 +13,22 @@
 #include <sstream>
 #include <fstream>
 #include <filesystem>
-
+#include <stdlib.h>
+#include <process.h>
+#include <wchar.h>
 
 using namespace std;
 using namespace cv;
 
+
+std::string GetCurrentDirectory()
+{
+	char buffer[MAX_PATH];
+	GetModuleFileNameA(NULL, buffer, MAX_PATH);
+	std::string::size_type pos = std::string(buffer).find_last_of("\\/");
+
+	return std::string(buffer).substr(0, pos);
+}
 
 void detectAndDisplay(Mat frame);
 CascadeClassifier face_cascade;
@@ -253,7 +264,48 @@ int main(int argc, const char** argv)
 
 	//detectObjectAndDisplayInEllipse(img, face_cascade_name);
 	//detectObjectAndDisplayInRectangle(img_lena, face_cascade_name);
-	detectObjectAndDisplayInRectangle(img, face_cascade_name);
+	//detectObjectAndDisplayInRectangle(img, face_cascade_name);
+
+	//int i;
+	//printf("Checking if processor is available...");
+	//if (system(NULL)) puts("Ok");
+	//else exit(EXIT_FAILURE);
+	//printf("Executing command DIR...\n");
+	//i = system("dir");
+	//printf("The value returned was: %d.\n", i);
+
+
+
+
+	cout << "my directory is " << GetCurrentDirectory() << "\n";
+
+	//cd to the folder first
+	string cdConsoleCommand = "cd " + GetCurrentDirectory()+"\\ffmpeg";
+
+	/*Nhắc nhở, chỉ đc sử dụng 1 dòng system("command") thôi
+	//const char* commandcdConsoleCommand = cdConsoleCommand.c_str();
+	//cout << "Compiling: "<<cdConsoleCommand << endl;
+	//system(commandcdConsoleCommand);
+	//cout << GetCurrentDirectory()<<endl;
+	*/
+
+
+	string filename="testVD1.mp4";
+	std::size_t found = filename.find_last_of(".");
+	string filenamewithoutext = filename.substr(0, found);
+	string prepeareFolderForThumbnailsCommand = "prepareFolder " + filenamewithoutext;
+
+	string thubnailshotsCommand = "ffmpeg -i "+filename+" -vf fps=1/20 "+ filenamewithoutext +"\\img%03d.png";
+	string str = cdConsoleCommand +" && "+prepeareFolderForThumbnailsCommand + " && " + thubnailshotsCommand + " && ffplay " + filename;
+
+	// Convert string to const char * as system requires
+	// parameter of type const char *
+	const char* command = str.c_str();
+
+	cout << "Compiling file using " << command << endl;
+	system(command);
+
+	cout << "\nRunning file ";
 
 	getchar();
 
