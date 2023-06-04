@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <process.h>
 #include <wchar.h>
+#include <filesystem>
 
 using namespace std;
 using namespace cv;
@@ -120,7 +121,7 @@ void detectObjectAndDisplayInRectangle(Mat frame, CascadeClassifier obj_cascade)
 
 int main(int argc, const char** argv)
 {
-
+	cout << argv[0] << endl;
 
 	CommandLineParser parser(argc, argv,
 		"{help h||}"
@@ -280,7 +281,7 @@ int main(int argc, const char** argv)
 	cout << "my directory is " << GetCurrentDirectory() << "\n";
 
 	//cd to the folder first
-	string cdConsoleCommand = "cd " + GetCurrentDirectory()+"\\ffmpeg";
+	string cdConsoleCommand = "cd ffmpeg";
 
 	/*Nhắc nhở, chỉ đc sử dụng 1 dòng system("command") thôi
 	//const char* commandcdConsoleCommand = cdConsoleCommand.c_str();
@@ -290,20 +291,22 @@ int main(int argc, const char** argv)
 	*/
 
 
+	//String file_path = samples::findFile("ffmpeg/testVD1.mp4");
 	string filename="testVD1.mp4";
 	std::size_t found = filename.find_last_of(".");
 	string filenamewithoutext = filename.substr(0, found);
-	string prepeareFolderForThumbnailsCommand = "prepareFolder " + filenamewithoutext;
+	//string prepeareFolderForThumbnailsCommand = "prepareFolder " + filenamewithoutext;
+	//string thubnailshotsCommand = "ffmpeg -i "+ filename +" -vf fps=1/20 "+ filenamewithoutext +"\\img%03d.png";
+	string str = cdConsoleCommand +" && prepare "+ filenamewithoutext + " "+ filename;
 
-	string thubnailshotsCommand = "ffmpeg -i "+filename+" -vf fps=1/20 "+ filenamewithoutext +"\\img%03d.png";
-	string str = cdConsoleCommand +" && "+prepeareFolderForThumbnailsCommand + " && " + thubnailshotsCommand + " && ffplay " + filename;
+	system(("cd " + GetCurrentDirectory() +" && cd ../.. && "+str).c_str());
 
 	// Convert string to const char * as system requires
 	// parameter of type const char *
 	const char* command = str.c_str();
 
 	cout << "Compiling file using " << command << endl;
-	system(command);
+	//system(command);
 
 	cout << "\nRunning file ";
 
