@@ -17,9 +17,12 @@
 #include <process.h>
 #include <wchar.h>
 #include <filesystem>
+namespace fs = std::filesystem;
+
 
 using namespace std;
 using namespace cv;
+
 
 
 std::string GetCurrentDirectory()
@@ -142,6 +145,8 @@ int main(int argc, const char** argv)
 	String eyes_cascade_name = samples::findFile(parser.get<String>("eyes_cascade"));
 	String objs_cascade_name = samples::findFile(parser.get<String>("objs_cascade"));
 	String objs_picture_path = samples::findFile("data/image.jpg");
+	String objs_picture_test_path = samples::findFile("data/image.jpg");
+
 	String objs_picture_lena_path = samples::findFile("data/lena.png");
 
 	cout << objs_picture_path + "\n";
@@ -232,6 +237,13 @@ int main(int argc, const char** argv)
 		std::cout << "Could not read the image: " << objs_picture_path << std::endl;
 		return 1;
 	}
+
+	Mat img_test = imread(objs_picture_test_path, IMREAD_COLOR);
+	if (img.empty())
+	{
+		std::cout << "Could not read the image: " << objs_picture_path << std::endl;
+		return 1;
+	}
 #pragma endregion
 
 
@@ -295,20 +307,38 @@ int main(int argc, const char** argv)
 	string filename="testVD1.mp4";
 	std::size_t found = filename.find_last_of(".");
 	string filenamewithoutext = filename.substr(0, found);
-	//string prepeareFolderForThumbnailsCommand = "prepareFolder " + filenamewithoutext;
-	//string thubnailshotsCommand = "ffmpeg -i "+ filename +" -vf fps=1/20 "+ filenamewithoutext +"\\img%03d.png";
-	string str = cdConsoleCommand +" && prepare "+ filenamewithoutext + " "+ filename;
-
-	system(("cd " + GetCurrentDirectory() +" && cd ../.. && "+str).c_str());
-
+	string solution_dir = SOLUTION_DIR;
+	string str = "cd " + solution_dir +" && "+cdConsoleCommand +" && prepare "+ filenamewithoutext + " "+ filename;
 	// Convert string to const char * as system requires
 	// parameter of type const char *
+
+
+
 	const char* command = str.c_str();
 
 	cout << "Compiling file using " << command << endl;
-	//system(command);
+	system(command);
 
 	cout << "\nRunning file ";
+
+
+	//std::string path = GetCurrentDirectory()+"/LearnOpenCV.tlog";
+	//for (const auto& entry : fs::directory_iterator(path)) {
+	//	std::cout << entry.path() << std::endl;
+
+	//}
+	
+	//cout<<endl << SOLUTION_DIR <<endl;
+	//string filepathtest = GetCurrentDirectory();
+	//fs::path p {GetCurrentDirectory()};
+
+	//cout << p << endl;
+
+//	while (p.parent_path()!= "") {
+//cout << "The parent path of " << p<< " is " << p.parent_path() << '\n';
+//p = p.parent_path();
+//	}
+
 
 	getchar();
 
