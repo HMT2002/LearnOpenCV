@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 
 /ffmpeg/convert
+/ffmpeg/*.mp4
